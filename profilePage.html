@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>PROFILE PAGE</title>
+</head>
+<body class="min-h-screen bg-[#0b1a14]">
+    <nav class="bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-8 py-4 sm:py-5 border-b border-white/10 gap-4 sm:gap-0">
+        <div class="flex flex-wrap items-center gap-4 sm:gap-6 text-sm font-medium">
+            <span class="text-base sm:text-lg font-bold flex items-center gap-2">
+                <img src="Kasu Blog logo with symbols.png" alt="" class="w-16">
+                KASU BLOG
+            </span>
+            <a href="homePage.html" class="text-gray-600 hover:text-[#102217]">Home</a>
+            <a href="aboutPage.html" class="text-gray-600 hover:text-[#102217]">About</a>
+        </div>
+
+        <button onclick="logout()" class="self-start sm:self-auto bg-[#102217] text-white px-5 py-2 rounded-full text-sm hover:bg-green-800">
+            Logout
+        </button>
+    </nav>
+
+    <div class="max-w-4xl mx-auto mt-8 sm:mt-12 bg-white rounded-3xl shadow p-4 sm:p-6">
+
+        <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+            <div id="avatar" onclick="toggleSelector()" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-200 flex items-center justify-center text-4xl sm:text-5xl cursor-pointer">
+                <span id="avatarIcon">👤</span>
+            </div>
+            <div>
+                <h2 id="username" class="text-xl sm:text-2xl font-bold text-gray-800">User Name</h2>
+                <p id="userEmail" class="text-gray-500 text-sm">user@email.com</p>
+            </div>
+        </div>
+
+        <div id="selector" class="hidden mt-6 flex gap-4 flex-wrap">
+            <button onclick="selectAvatar('boy')" class="px-4 py-2 bg-[#102217] text-white rounded-lg">
+                👦 Boy
+            </button>
+            <button onclick="selectAvatar('girl')" class="px-4 py-2 bg-green-600 text-white rounded-lg">
+                👧 Girl
+            </button>
+        </div>
+
+        <p class="mt-6 text-gray-600 text-sm sm:text-base">
+            Welcome to your personal profile page on the KASU Blog Platform.
+            Share your thoughts, ideas and complaints about your experiences at Kaduna State University with the community
+        </p>
+
+        <div class="mt-8 border-b flex gap-6 sm:gap-8 text-sm flex-wrap">
+            <button id="postsTab" onclick="showPosts()" class="border-b-2 border-[#102217] pb-2 font-medium text-[#102217]">
+                Posts
+            </button>
+
+            <button id="writeTab" onclick="showWrite()" class="pb-2 text-gray-500 hover:text-[#102217]">
+                Write a Post
+            </button>
+        </div>
+
+        <div id="writeSection" class="mt-8 hidden">
+            <textarea id="postContent" placeholder="What’s on your mind?" class="w-full border rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#102217]" rows="4"></textarea>
+            <button onclick="createPost()" class="mt-3 bg-[#102217] text-white px-6 py-2 rounded-full hover:bg-green-800">
+                Post
+            </button>
+        </div>
+
+        <div id="postsSection" class="mt-8 sm:mt-10 space-y-4"></div>
+    </div>
+
+    <script>
+        const currentUserEmail = localStorage.getItem("currentUser");
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+
+        if (!currentUserEmail){
+            window.location.href = "logIn.html";
+        }
+
+        const currentUser = users.find(u => u.email === currentUserEmail);
+
+        if (currentUser){
+            document.getElementById("username").textContent = currentUser.username;
+            document.getElementById("userEmail").textContent = currentUser.email;
+        }
+
+        const avatar = document.getElementById("avatar");
+        const avatarIcon = document.getElementById("avatarIcon");
+        const selector = document.getElementById("selector");
+
+        function toggleSelector(){
+            selector.classList.toggle("hidden");
+        }
+
+        function selectAvatar(type){
+            if (type === "boy"){
+                avatar.className ="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-4xl sm:text-5xl bg-[#102217] text-white cursor-pointer";
+                avatarIcon.textContent = "👦";
+                localStorage.setItem("avatar", "boy");
+            }
+
+            if (type === "girl"){
+                avatar.className ="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-4xl sm:text-5xl bg-green-600 text-white cursor-pointer";
+                avatarIcon.textContent = "👧";
+                localStorage.setItem("avatar", "girl");
+            }
+
+            selector.classList.add("hidden");
+        }
+
+        const savedAvatar = localStorage.getItem("avatar");
+        if (savedAvatar) selectAvatar(savedAvatar);
+
+        function logout(){
+            localStorage.removeItem("currentUser");
+            window.location.href = "logIn.html";
+        }
+
+        function createPost(){
+            const content = document.getElementById("postContent").value.trim();
+            if (!content) return alert("Write something first ");
+
+            const posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+            const newPost = {
+                id: Date.now(),
+                author: currentUser.username,
+                email: currentUser.email,
+                content,
+                time: new Date().toLocaleString(),
+                likes: 0
+            };
+
+            posts.unshift(newPost);
+            localStorage.setItem("posts", JSON.stringify(posts));
+
+            document.getElementById("postContent").value = "";
+            displayUserPosts();
+            showPosts();
+        }
+
+        function displayUserPosts(){
+            const posts = JSON.parse(localStorage.getItem("posts")) || [];
+            const userPosts = posts.filter(p => p.email === currentUser.email);
+
+            const container = document.getElementById("postsSection");
+            container.innerHTML = "";
+
+            if (userPosts.length === 0) {
+                container.innerHTML = "<p class='text-gray-400'>You haven’t posted anything yet.</p>";
+                return;
+            }
+
+            userPosts.forEach(post => {
+                container.innerHTML += `
+                <div class="bg-white border rounded-xl p-4 shadow-sm">
+                    <p class="text-gray-700 mb-2">${post.content}</p>
+
+                    <div class="flex justify-between items-center text-xs text-gray-400">
+                    <span>${post.time}</span>
+
+                    <button onclick="deletePost(${post.id})" class="text-red-500 hover:underline">
+                        Delete
+                    </button>
+                    </div>
+                </div>
+                `;
+            });
+        }
+
+        function deletePost(postId){
+            let posts = JSON.parse(localStorage.getItem("posts")) || [];
+            posts = posts.filter(p => p.id !== postId);
+            localStorage.setItem("posts", JSON.stringify(posts));
+            displayUserPosts();
+        }
+
+        function showPosts(){
+            postsSection.classList.remove("hidden");
+            writeSection.classList.add("hidden");
+
+            postsTab.classList.add("border-b-2", "border-[#102217]", "text-[#102217]");
+            writeTab.classList.remove("border-b-2", "border-[#102217]", "text-[#102217]");
+        }
+
+        function showWrite() {
+            writeSection.classList.remove("hidden");
+            postsSection.classList.add("hidden");
+
+            writeTab.classList.add("border-b-2", "border-[#102217]", "text-[#102217]");
+            postsTab.classList.remove("border-b-2", "border-[#102217]", "text-[#102217]");
+        }
+        displayUserPosts();
+    </script>
+</body>
+</html>
