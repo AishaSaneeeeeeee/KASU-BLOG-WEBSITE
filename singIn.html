@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>SIGN IN</title>
+</head>
+<body class="bg-[#102217] min-h-screen flex items-center justify-center px-4">
+    <div class="flex flex-col items-center w-full max-w-sm bg-white rounded-lg p-6 sm:p-8">
+
+        <h1 class="text-[#102217] text-xl font-bold mb-4">Create New Account</h1>
+
+        <div class="mb-4 w-full">
+            <p class="text-[#334155] mb-1">Username</p>
+            <input type="text" id="username" placeholder="eg, Aisha Sani" class="bg-[#F5F7F8] text-[#94A3B8] border border-[#CBD5E1] rounded-full px-5 py-3 w-full hover:border-[#19A1F5]"/>
+        </div>
+        
+        <div class="mb-4 w-full">
+            <p class="text-[#334155] mb-1">Email</p>
+            <input type="email" id="email" placeholder="Enter your email" required class="bg-[#F5F7F8] text-[#94A3B8] border border-[#CBD5E1] rounded-full px-5 py-3 w-full hover:border-[#19A1F5]"/>
+        </div>
+
+        <div class="mb-4 w-full">
+            <p class="text-[#334155] mb-1">Password</p>
+            <input type="password" id="password" placeholder="Enter your password" required class="bg-[#F5F7F8] text-[#94A3B8] border border-[#CBD5E1] rounded-full px-5 py-3 w-full hover:border-[#19A1F5]"/>
+        </div>
+
+        <button class="bg-[#102217] text-white rounded-full py-3 w-full mt-2 mb-4" onclick="signup()">
+            Sign Up
+        </button>
+
+        <p class="text-[#475569] text-sm text-center">
+            Already have an account?
+            <a href="login.html" class="text-[#102217] font-medium">Log in</a>
+        </p>
+    </div>
+
+    <script>
+        function signup(){
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const username = document.getElementById("username").value;
+
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+            const userExists = users.some(user => user.email === email);
+
+            if (userExists) {
+                alert("Account already exists. Please sign in.");
+                return;
+            }
+            users.push({ email, password, username });
+            localStorage.setItem("users", JSON.stringify(users));
+            localStorage.setItem("currentUser", email);
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
